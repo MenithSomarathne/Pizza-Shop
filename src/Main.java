@@ -7,9 +7,9 @@ import model.enums.OrderStatus;
 import model.enums.PizzaSize;
 import model.enums.PizzaTopping;
 import model.order.PreparationState;
+import model.payment.CardPayment;
 import model.payment.CashPayment;
-import model.payment.CreditCardPayment;
-import model.payment.MobilePayment;
+import model.payment.PayPalPayment;
 import model.payment.PaymentStrategy;
 import model.promotion.Promotion;
 import service.CustomerService;
@@ -35,20 +35,24 @@ public class Main {
     public static void main(String[] args) {
         Main main = new Main();
         main.run();
+
+
     }
 
     public void run() {
         while (true) {
-            System.out.println("Welcome to the Pizza Mania Ordering System!");
-            System.out.println("1. Place Order");
-            System.out.println("2. View Orders");
-            System.out.println("3. User Profile");
-            System.out.println("4. View Order Status");
-            System.out.println("5. Seasonal Offer");
-            System.out.println("6. Give A Feedback");
-            System.out.println("7. Exit");
+            clearScreen(); // Clear the screen for a clean look
+            printHeader("🍕 Welcome to Pizza Mania Ordering System! 🍕");
+            System.out.println("\033[1;34m1. Place Order\033[0m");
+            System.out.println("\033[1;34m2. View Orders\033[0m");
+            System.out.println("\033[1;34m3. User Profile\033[0m");
+            System.out.println("\033[1;34m4. View Order Status\033[0m");
+            System.out.println("\033[1;34m5. Seasonal Offer\033[0m");
+            System.out.println("\033[1;34m6. Give Feedback\033[0m");
+            System.out.println("\033[1;34m7. Exit\033[0m");
 
-            int choice = scanner.nextInt();
+            System.out.print("\n\033[1;33mPlease select an option: \033[0m");
+            int choice = getIntInput(1, 7, "\033[1;31mInvalid choice. Please try again.\033[0m");
 
             switch (choice) {
                 case 1:
@@ -69,13 +73,28 @@ public class Main {
                 case 6:
                     handleFeedbackAndRatings(scanner);
                     break;
-                case 7 :
-                    System.out.println("Thank you for using the Pizza Mania Ordering System!");
+                case 7:
+                    printFooter("Thank you for using the Pizza Mania Ordering System!");
                     return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+
+    private void printHeader(String title) {
+        String border = "═".repeat(title.length());
+        System.out.println("\033[1;32m╔" + border + "╗\033[0m");
+        System.out.println("\033[1;32m║ " + title + " ║\033[0m");
+        System.out.println("\033[1;32m╚" + border + "╝\033[0m\n");
+    }
+
+    private void printFooter(String message) {
+        System.out.println("\n\033[1;36m" + message + "\033[0m");
+        System.out.println("\033[1;36mGoodbye! Have a great day! 🍕\033[0m");
+    }
+
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
     private void placeOrder() {
@@ -129,19 +148,19 @@ public class Main {
 
     private Pizza customizePizza() {
         System.out.println("Select pizza size:");
-        System.out.println("1. Small");
-        System.out.println("2. Medium");
-        System.out.println("3. Large");
-        PizzaSize size = switch (getIntInput(1, 3, "Invalid choice. Defaulting to Small.")) {
+        System.out.println("1. Mini");
+        System.out.println("2. Regular");
+        System.out.println("3. Family");
+        PizzaSize size = switch (getIntInput(1, 3, "Invalid choice. Defaulting to Mini.")) {
             case 1 -> PizzaSize.SMALL;
             case 2 -> PizzaSize.REGULAR;
             case 3 -> PizzaSize.LARGE;
             default -> PizzaSize.SMALL;
         };
 
-        String crust = selectOption("Select crust type:", new String[]{"None", "Thin Crust", "Thick Crust", "Stuffed Crust"});
-        String sauce = selectOption("Select sauce type:", new String[]{"None", "Tomato Sauce", "Alfredo Sauce", "BBQ Sauce"});
-        String cheese = selectOption("Select cheese type:", new String[]{"None", "Mozzarella", "Cheddar", "Parmesan"});
+        String crust = selectOption("Select crust style:", new String[]{"No Crust", "Crispy Crust", "Fluffy Crust", "Cheese Burst"});
+        String sauce = selectOption("Select base sauce:", new String[]{"No Sauce", "Marinara Sauce", "Garlic Sauce", "Hot Sauce"});
+        String cheese = selectOption("Select cheese variety:", new String[]{"No Cheese", "Swiss", "Feta", "Provolone"});
         List<PizzaTopping> toppings = selectToppings();
 
         return new Pizza.PizzaBuilder()
@@ -152,6 +171,7 @@ public class Main {
                 .addToppings(toppings)
                 .build();
     }
+
 
     private String selectOption(String prompt, String[] options) {
         System.out.println(prompt);
@@ -250,24 +270,54 @@ public class Main {
 
     private PaymentStrategy getPaymentStrategy() {
         System.out.println("Select payment method:");
-        System.out.println("1. Credit Card");
+        System.out.println("1. Card");
         System.out.println("2. Cash");
-        System.out.println("3. Mobile Payment");
+        System.out.println("3. PayPal");
         int paymentMethodChoice = getIntInput(1, 3, "Invalid choice. Defaulting to Cash.");
 
         return switch (paymentMethodChoice) {
             case 1 -> {
-                System.out.println("Enter your credit card number:");
-                String cardNumber = scanner.nextLine();
-                System.out.println("Enter your name on the card:");
-                String cardHolderName = scanner.nextLine();
-                yield new CreditCardPayment(cardNumber, cardHolderName);
+                String cardNumber = null;
+                boolean validCard = false;
+                while (!validCard) {
+                    System.out.println("Enter your card number (16 digits):");
+                    cardNumber = scanner.nextLine();
+                    if (cardNumber.matches("\\d{16}")) {
+                        validCard = true;
+                    } else {
+                        System.out.println("Invalid card number. Please enter a valid 16-digit card number.");
+                    }
+                }
+
+                String cardHolderName = null;
+                boolean validName = false;
+                while (!validName) {
+                    System.out.println("Enter your name on the card:");
+                    cardHolderName = scanner.nextLine();
+                    if (!cardHolderName.trim().isEmpty()) {
+                        validName = true;
+                    } else {
+                        System.out.println("Name cannot be empty. Please enter a valid name.");
+                    }
+                }
+
+                yield new CardPayment(cardNumber, cardHolderName);
             }
             case 2 -> new CashPayment();
             case 3 -> {
-                System.out.println("Enter your mobile number:");
-                String mobileNumber = scanner.nextLine();
-                yield new MobilePayment(mobileNumber);
+                String paypalEmail = null;
+                boolean validEmail = false;
+                while (!validEmail) {
+                    System.out.println("Enter your PayPal email:");
+                    paypalEmail = scanner.nextLine();
+                    if (paypalEmail.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
+                        validEmail = true;
+                    } else {
+                        System.out.println("Invalid email address. Please enter a valid PayPal email.");
+                    }
+                }
+
+                yield new PayPalPayment(paypalEmail);
             }
             default -> new CashPayment();
         };
@@ -291,7 +341,7 @@ public class Main {
 
         return order;
     }
-    ///////////////////////////////////////////////////////////////////////
+
 
     // Helper method for input validation
     private int getIntInput(int min, int max, String errorMessage) {
