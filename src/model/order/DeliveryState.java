@@ -3,7 +3,8 @@ package model.order;
 public class DeliveryState implements OrderState {
     @Override
     public void handleOrder(Order order) {
-        System.out.println("Order is out for delivery.");
+        order.setOrderStatus("Order is out for delivery.");
+//        System.out.println("Order is out for delivery.");
 
         // Simulate delivery time
         try {
@@ -13,7 +14,8 @@ public class DeliveryState implements OrderState {
         }
 
         // Transition to CompletedState when delivery is finished
-        System.out.println("Order has been delivered.");
+        order.setOrderStatus("Order has been delivered.");
+//        System.out.println("Order has been delivered.");
         order.setState(new CompletedState()); // Order completed after delivery
     }
 }
