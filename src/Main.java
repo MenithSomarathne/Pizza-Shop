@@ -45,7 +45,8 @@ public class Main {
             System.out.println("3. User Profile");
             System.out.println("4. View Order Status");
             System.out.println("5. Seasonal Offer");
-            System.out.println("6. Exit");
+            System.out.println("6. Give A Feedback");
+            System.out.println("7. Exit");
 
             int choice = scanner.nextInt();
 
@@ -66,6 +67,9 @@ public class Main {
                     displaySeasonalOffer();
                     break;
                 case 6:
+                    handleFeedbackAndRatings(scanner);
+                    break;
+                case 7 :
                     System.out.println("Thank you for using the Pizza Mania Ordering System!");
                     return;
                 default:
@@ -118,7 +122,8 @@ public class Main {
 
        System.out.println("Your order has been placed with ID: " + order.getId());
        trackOrderStatus(order, deliveryMethod);
-   }
+
+         }
 
     private Pizza customizePizza() {
         System.out.println("Select pizza size:");
@@ -409,6 +414,25 @@ public class Main {
 
         System.out.println("Favorite pizza reordered! Order ID: " + order.getId());
     }
+    private static void handleFeedbackAndRatings(Scanner scanner) {
+        System.out.println("\nFeedback and Ratings:");
+        System.out.println("Please rate your experience (1-5): ");
+        int rating = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        if (rating < 1 || rating > 5) {
+            System.out.println("Invalid rating. Please provide a rating between 1 and 5.");
+        } else {
+            System.out.println("Thank you for your feedback! You rated us: " + rating + " stars.");
+            System.out.println("Would you like to leave additional comments? (yes/no): ");
+            String additionalComments = scanner.nextLine();
+            if (additionalComments.equalsIgnoreCase("yes")) {
+                System.out.println("Please enter your comments: ");
+                String comments = scanner.nextLine();
+                System.out.println("Thank you for your comments: " + comments);
+            }
+
+        }
+    }
 
     private void viewOrderStatus() {
         System.out.println("Enter order ID to check status:");
@@ -440,27 +464,27 @@ public class Main {
         Thread orderTrackingThread = new Thread(() -> {
             try {
                 // Order placed, transitioning to preparation
-                Thread.sleep(30000); // Simulate time taken for each step
+                Thread.sleep(10000); // Simulate time taken for each step
                 order.setState(new PreparationState());
                 order.handleOrder(); // Handle the state change
                 System.out.println("Transitioned to: PreparationState");
 
                 if (deliveryMethod.equals("Delivery")) {
                     // Simulate delivery process
-                    Thread.sleep(30000); // Simulate time for delivery
+                    Thread.sleep(10000); // Simulate time for delivery
                     order.setState(new DeliveryState());
                     order.handleOrder(); // Handle the state change
                     System.out.println("Transitioned to: DeliveryState");
 
                     // Final transition to completed
-                    Thread.sleep(30000); // Simulate time for delivery completion
+                    Thread.sleep(10000); // Simulate time for delivery completion
                     order.setState(new CompletedState());
                     order.handleOrder(); // Handle the state change
                     System.out.println("Transitioned to: CompletedState");
 
                 } else {
                     // Simulate pickup process
-                    Thread.sleep(30000); // Simulate time for pickup
+                    Thread.sleep(10000); // Simulate time for pickup
                     order.setState(new CompletedState());
                     order.handleOrder(); // Handle the state change
                     System.out.println("Transitioned to: CompletedState");
@@ -473,4 +497,5 @@ public class Main {
 
         orderTrackingThread.start(); // Start the state change thread
     }
+
 }
