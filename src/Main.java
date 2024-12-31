@@ -516,32 +516,28 @@ public class Main {
         Thread orderTrackingThread = new Thread(() -> {
             try {
                 // Order placed, transitioning to preparation
-                Thread.sleep(10000); // Simulate time taken for each step
+                Thread.sleep(40000); // Simulate time taken for each step
                 order.setState(new PreparationState());
                 order.handleOrder(); // Handle the state change
-//                System.out.println("Transitioned to: PreparationState");
+
 
                 if (deliveryMethod.equals("Delivery")) {
                     // Simulate delivery process
-                    Thread.sleep(10000); // Simulate time for delivery
+                    Thread.sleep(40000); // Simulate time for delivery
                     order.setState(new DeliveryState());
                     order.handleOrder(); // Handle the state change
-//                    System.out.println("Transitioned to: DeliveryState");
 
                     // Final transition to completed
-                    Thread.sleep(10000); // Simulate time for delivery completion
+                    Thread.sleep(40000); // Simulate time for delivery completion
                     order.setState(new CompletedState());
                     order.handleOrder(); // Handle the state change
-//                    System.out.println("Transitioned to: CompletedState");
-
                 } else {
                     // Simulate pickup process
-                    Thread.sleep(10000); // Simulate time for pickup
+                    Thread.sleep(40000); // Simulate time for pickup
                     order.setState(new CompletedState());
                     order.handleOrder(); // Handle the state change
-//                    System.out.println("Transitioned to: CompletedState");
-                }
 
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

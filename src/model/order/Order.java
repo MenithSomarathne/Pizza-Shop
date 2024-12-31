@@ -16,11 +16,15 @@ public class Order {
     private double totalAmount;
     private LocalDateTime orderDate;
 
-    // Constructor
     public Order() {
         this.state = new OrderedState();
         this.orderStatus = "Ordered";
     }
+    public void handleOrder() {
+
+        this.state.handleOrder(this);
+    }
+
 
     // Getters and Setters
     public int getId() {
@@ -33,6 +37,7 @@ public class Order {
 
 
     public void setState(OrderState state) {
+
         this.state = state;
     }
 
@@ -60,11 +65,9 @@ public class Order {
         this.orderDate = orderDate;
     }
 
-    public void handleOrder() {
-        this.state.handleOrder(this);
-    }
 
     public OrderState getState() {
+
         return state;
     }
 
