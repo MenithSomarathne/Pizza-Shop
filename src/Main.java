@@ -117,9 +117,9 @@ public class Main {
        }
 
        // Step 5: Get or Create Customer
-       System.out.println("Enter your contact number:");
-       String phoneNumber = scanner.nextLine();
-       Customer customer = getOrCreateCustomer(phoneNumber);
+        System.out.println("Enter your contact number:");
+        String phoneNumber = getValidatedPhoneNumber();
+        Customer customer = getOrCreateCustomer(phoneNumber);
 
        // Step 6: Calculate Order Amount and Apply Loyalty Discount
        double orderAmount = pizza.getPrice() * quantity;
@@ -145,6 +145,19 @@ public class Main {
 
 
          }
+
+
+    private String getValidatedPhoneNumber() {
+        String regex = "^(07[0-9]{8})$";
+        while (true) {
+            String input = scanner.nextLine().trim();
+            if (input.matches(regex)) {
+                return input;
+            } else {
+                System.out.println("Invalid phone number. Please enter a valid contact number (e.g., 0771234567):");
+            }
+        }
+    }
 
     private Pizza customizePizza() {
         System.out.println("Select pizza size:");
@@ -246,15 +259,43 @@ public class Main {
         Customer customer = customerService.getCustomerByPhoneNumber(phoneNumber);
         if (customer == null) {
             System.out.println("New customer detected. Please provide your name:");
-            String name = scanner.nextLine();
+            String name;
+            while (true) {
+                name = scanner.nextLine().trim();
+                if (isValidName(name)) {
+                    break;
+                } else {
+                    System.out.println("Invalid name. Please provide a valid name (letters and spaces only):");
+                }
+            }
+
             System.out.println("Please provide your email:");
-            String email = scanner.nextLine();
+            String email;
+            while (true) {
+                email = scanner.nextLine().trim();
+                if (isValidEmail(email)) {
+                    break;
+                } else {
+                    System.out.println("Invalid email. Please provide a valid email address:");
+                }
+            }
+
             customer = customerService.createCustomer(name, phoneNumber, email);
             System.out.println("Welcome, " + name + "! Your loyalty points have been initialized to 0.");
         } else {
             System.out.println("Welcome back, " + customer.getName() + "! You currently have " + customer.getLoyaltyPoints() + " loyalty points.");
         }
         return customer;
+    }
+
+    // Validation for name: letters and spaces only
+    private boolean isValidName(String name) {
+        return name.matches("^[A-Za-z\\s]+$");
+    }
+
+    // Validation for email
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 
     private double applyLoyaltyPoints(Customer customer, double orderAmount) {
